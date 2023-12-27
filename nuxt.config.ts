@@ -3,5 +3,9 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'cloudflare-pages'
   },
-  devtools: { enabled: true }
+  devtools: { enabled: true },
+  modules: ['@nuxt/ui', '@nuxtjs/supabase', 'nuxt-icon-tw'],
+  supabase: {
+    redirect: false,
+  },
 })
