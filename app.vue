@@ -4,4 +4,5 @@
     <NuxtPage />
   </NuxtLayout>
 </div>
+<UNotifications />
 </template>

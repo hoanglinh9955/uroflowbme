@@ -12,7 +12,8 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
 
@@ -23,7 +24,8 @@ PointElement,
 LineElement,
 Title,
 Tooltip,
-Legend
+Legend,
+Filler
 )
 
 export default {
@@ -45,51 +47,37 @@ data() {
       labels: this.time_data,
       datasets: [
         {
-          label: 'data 1',
+          label: 'Volume',
           data: this.value_data,
           fill: true,
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           borderColor: 'rgb(75, 192, 192)',
-          pointRadius: 2,
-          borderWidth: 1
-          
+          tension: 0.4,
+          pointBorderWidth: 0,
+          pointStyle: false
         },
-        // {
-        //   data:[
-        //     {x:0, y:0},
-        //     {x:27000, y:0}
-        //   ],
-        //   fill:0,
-        //   backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        //   borderColor: 'rgb(75, 192, 192)',
-        //   pointBackgroundColor: 'rgba(75, 192, 192, 1)',
-        // },
-        
       ]
     },
     chartOptions: {
       responsive: true,
-      
-      // maintainAspectRatio: false,
      scales: {
         x: {
           title: {
             display: true,
-            text: 'Time'
+            text: 'Time(s)'
           },
-          
-          min: 0,
-          // max: 2500, // Set the maximum value of x-axis to 25
+          ticks: {
+            maxTicksLimit: 20
+        },
         },
         y: {
           title: {
             display: true,
-            text: 'Value'
+            text: 'Volume'
           },
- 
+          
         }
-      }, 
-      
+      }
     }
   };
 }
