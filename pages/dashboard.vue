@@ -21,6 +21,7 @@ const isEdit = ref(false)
 const toast = useToast()
 const peopleData = reactive([])
 const selectedSignal = ref([])
+const isAddSignal = ref(false)
 const deleteId = ref(0)
 const signalOption = ref()
 const isDelete = ref(false)
@@ -50,9 +51,30 @@ signalOption.value = signalData.value
 const isOpenChart = ref(false);
 const isOpenAddPatient = storeToRefs(addOrderModal()).addPatientState;
 
+const isDisableButton = computed(() => {
+    if (selectedSignal.value.length > 0) {
+        return true;
+    } else {
+        return false;
+    }
+})
+
 
 const reloadState = storeToRefs(addOrderModal()).reloadState;
-console.log(reloadState.value)
+
+const currentDate = new Date();
+const birthDate = ref()
+birthDate.value = new Date(selected.value.dob);
+const age = storeToRefs(addOrderModal()).age;
+const ageInMilliseconds = currentDate - birthDate.value;
+const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25; // Account for leap years
+const ageInYears = ageInMilliseconds / millisecondsPerYear;
+const roundedAge = Math.ceil(ageInYears);
+
+age.value = roundedAge
+console.log("🚀 ~ age:", age)
+
+
 const supabase = useSupabaseClient();
 const logout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -74,9 +96,7 @@ const isSignalSelected = computed(() => {
 })
 
 watch(selectedSignal, async () => {
-   
-    console.log("🚀 ~ selectedSignal this is work:", selectedSignal)
-   await navigateTo(`/dashboard/${selectedSignal.value}`)
+    await navigateTo(`/dashboard/${selectedSignal.value}`)
 });
 
 const onSubmit = async () => {
@@ -88,7 +108,7 @@ const onSubmit = async () => {
     } else {
         genderstatus.value = 0
     }
-    console.log(genderstatus.value + ' this is gender status')
+
     const { data, pending, error, refresh } = await useFetch('https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/patient/add', {
         method: 'post',
         body: {
@@ -98,8 +118,6 @@ const onSubmit = async () => {
         }
     })
 
-    console.log(data)
-    console.log(error)
     if (data.value.message === 'Patient added successfully') {
         isSubmit.value = false;
         isOpenAddPatient.value = false
@@ -110,7 +128,7 @@ const onSubmit = async () => {
 
 
 const onSubmitEdit = async () => {
-    console.log(state)
+
     isEdit.value = true;
 
     if (state.gender === 'Male') {
@@ -118,8 +136,8 @@ const onSubmitEdit = async () => {
     } else {
         genderstatus.value = 0
     }
-    console.log(genderstatus.value + ' this is gender status')
-    
+
+
     const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/patient/modify/${selected.value.patient_id}`, {
         method: 'put',
         body: {
@@ -129,8 +147,6 @@ const onSubmitEdit = async () => {
         }
     })
 
-    console.log(data)
-    console.log(error)
     if (data.value.message === 'Patient information updated successfully') {
         isEdit.value = false;
         isOpenAddPatient.value = false
@@ -177,6 +193,16 @@ watch(selected,
         selectedSignal.value = [];
         const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal_meta/${selected.value.patient_id}`)
         signalOption.value = data.value
+        birthDate.value = new Date(selected.value.dob);
+        const currentDate = new Date();
+
+        const ageInMilliseconds = currentDate - birthDate.value;
+        const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25; // Account for leap years
+        const ageInYears = ageInMilliseconds / millisecondsPerYear;
+        const roundedAge = Math.ceil(ageInYears);
+
+        age.value = roundedAge
+        console.log("🚀 ~ age:", age)
     }
 )
 
@@ -292,8 +318,9 @@ const links = [
             <div class="w-full p-3" v-if="selected">
                 <!-- add patient container     -->
                 <div class="flex justify-between">
-                    <h1 class="text-white text-xl font-medium">Patient Infor</h1>
-                    <UButton class="rounded-lg bg-teal-600 hover:bg-teal-700" @click="isEdit = true">
+                    <h1 class="text-white text-xl font-medium">Patient Information</h1>
+                    <UButton :disabled="isDisableButton" class="rounded-lg bg-teal-600 hover:bg-teal-700"
+                        @click="isEdit = true">
                         <Icon size="15px" name="i-heroicons-pencil-square" />
                     </UButton>
                 </div>
@@ -316,25 +343,33 @@ const links = [
 
                 <div class="flex justify-between items-baseline">
                     <h1 class="pt-8 pb-4 text-white text-lg font-medium">Signal</h1>
-                    <UButton color="teal" class="rounded-lg h-auto bg-teal-600 hover:bg-teal-700"
-                        @click="isOpenAddPatient = true">
+                    <UButton :loading="isAddSignal" color="teal" class="rounded-lg h-auto bg-teal-600 hover:bg-teal-700"
+                        @click="isAddSignal = true">
                         <Icon size="15px" name="i-heroicons-funnel" />
                     </UButton>
-             
+
 
                 </div>
+
 
 
                 <USelect v-model="selectedSignal" :options="signalOption" option-attribute="signal_id"
                     placeholder="Select Signal" />
 
+                <div class="flex justify-end items-center py-2">
+                    <div> </div>
+                    <UButton v-show="isAddSignal" color="teal" class="rounded-lg h-auto bg-teal-600 hover:bg-teal-700"
+                        @click="isAddSignal = false">
+                        <Icon size="15px" name="i-heroicons-check" />Done
+                    </UButton>
+                </div>
             </div>
 
             <div v-else class="text-white">
                 choose patient
             </div>
 
-            <UserCard/>
+            <UserCard />
 
         </div>
 
@@ -355,11 +390,10 @@ const links = [
                             </UDropdown>
                         </template>
                         <template v-if="selected" #patient_id-data="{ row }">
-                            <span
-                                :class="{ 'text-teal-400 dark:text-teal-300': selected.patient_id == row.patient_id }">{{
-                                    row.patient_id }}</span>
+                            <span :class="{ 'text-teal-400 dark:text-teal-300': selected.patient_id == row.patient_id }">{{
+                                row.patient_id }}</span>
                         </template>
-                   
+
 
                     </UTable>
                     <template #error="{ error }">

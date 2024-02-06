@@ -4,5 +4,6 @@ export const addOrderModal = defineStore('addPient', () => {
 
   const addPatientState = ref(false)
   const reloadState = ref(1)
-  return { addPatientState, reloadState }
+  const age = ref(0)
+  return { addPatientState, reloadState , age}
 })

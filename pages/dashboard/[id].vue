@@ -42,10 +42,9 @@
         </div>
 
         <div class="col-span-3">
-            <!-- <Chart1 :value_data="chart.flow_rate.fr_value" :time_data="chart.flow_rate.fr_time" /> -->
-            <!-- <NomogramChartWrapper /> -->
+            <NewChart :listData="dataListNomo" :age="age" />
         </div>
-
+     
     </div>
 </template>
 
@@ -57,8 +56,10 @@ import type { FormError, FormSubmitEvent } from '#ui/types'
 import { addOrderModal } from '~/stores/storeModal'
 import { storeToRefs } from "pinia";
 const reloadState = storeToRefs(addOrderModal()).reloadState;
+const age = storeToRefs(addOrderModal()).age;
 const route = useRoute()
 const reduceArray = reactive([])
+
 const { data: chart, pending: chartPending, error: chartError } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal_info/${route.params.id}`)
 // console.log("🚀 ~ file: index.vue:8 ~ chart:", chart.value.flow_rate.fr_time)
 const goToDashBoard = async () => {
@@ -66,25 +67,9 @@ const goToDashBoard = async () => {
     console.log(reloadState.value)
     await navigateTo('/dashboard')
 }
+const dataListNomo = ref([
+      { voidvolume: Math.floor(chart.value.voided_volume) , qmax: chart.value.max_flow_rate, qave: chart.value.avg_flow_rate },
+    ]);
 
-const getArray = computed(()=>{
-    console.log(chart.value.signal_id )
-    if(chart.value.signal_id != 0){
-        const tmp = chart.value.flow_time;
-        const step = tmp /20
-        for(let i = 0 ; i < 21 ; i ++){
-            reduceArray.push(parseFloat((step * i).toFixed(1)));
-        }
-        return reduceArray
-    }
-    
-})
-watch(chartPending, async () => {
-    const tmp = Math.floor(chart.flow_time);
-        const step = tmp /20
-        for(let i = 0 ; i < 20 ; i ++){
-            reduceArray.push(step * i);
-        }
-})
 
 </script>

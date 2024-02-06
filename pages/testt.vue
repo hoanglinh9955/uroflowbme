@@ -1,19 +1,27 @@
-<script setup>
-const isOpen = ref(false)
-</script>
-
 <template>
-  <div class="bg-green-500 h-screen border-black flex justify-between">
-
-    <UButton label="Open" @click="isOpen = true" />
-    <div class="bg-red-700">this is div</div>
-    <USlideover v-model="isOpen" :side="'right'" 
-    :transition="true" :appear="true" 
-    :overlay="false">
-      <div class="p-4 flex-1">
-        <Placeholder class="h-full" />
-      </div>
-    </USlideover>
+  <div>
+    <!-- Pass an array of data to the listData prop -->
+    <NewChart :listData="dataList" :age="30" />
   </div>
 </template>
 
+<script>
+import { ref } from 'vue';
+import NewChart from '@/components/newChart.vue';
+
+export default {
+  name: 'ParentComponent',
+  components: {
+    NewChart
+  },
+  setup() {
+    const dataList = ref([
+      { voidvolume: 197, qmax: 21.25, qave: 4.16 },
+    ]);
+
+    return {
+      dataList
+    };
+  }
+};
+</script>
