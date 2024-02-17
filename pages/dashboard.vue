@@ -130,17 +130,17 @@ const onSubmit = async () => {
 
 const onSubmitDelete = async () => {
 
-    
-    console.log(selectedSignal.value)
-const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal/delete/${selectedSignal.value}`, {
-    method: 'delete'
-})
-selectedSignal.value = []
 
-if (data.value.message === 'Signal and related data deleted successfully') {
-    reloadState.value++
-    toast.add({ title: 'Delete signal success !', timeout: 2500, color: 'blue' })
-}
+    console.log(selectedSignal.value)
+    const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal/delete/${selectedSignal.value}`, {
+        method: 'delete'
+    })
+    selectedSignal.value = []
+
+    if (data.value.message === 'Signal and related data deleted successfully') {
+        reloadState.value++
+        toast.add({ title: 'Delete signal success !', timeout: 2500, color: 'blue' })
+    }
 }
 const onSubmitEdit = async () => {
 
@@ -188,6 +188,11 @@ const validate = (state: any): FormError[] => {
     return errors;
 };
 
+watch(isAddSignal, async () => {
+    reloadState.value++
+});
+
+
 watch(reloadState, async () => {
     const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/patient/get`);
 
@@ -201,8 +206,8 @@ watch(reloadState, async () => {
         );
     }
     selectedSignal.value = []
-    const { data: newData} = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal_meta/${selected.value.patient_id}`)
-        signalOption.value = newData.value
+    const { data: newData } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal_meta/${selected.value.patient_id}`)
+    signalOption.value = newData.value
 });
 
 watch(selected,
@@ -295,10 +300,10 @@ function select(row: any) {
 
 const q = ref('')
 
-const selectModal = computed(() =>{
-    if(selectedSignal.value.length != 0){
+const selectModal = computed(() => {
+    if (selectedSignal.value.length != 0) {
         return true
-    }else{
+    } else {
         return false
     }
 })
@@ -388,11 +393,12 @@ const links = [
 
                 <USelect color="gray" v-model="selectedSignal" :options="signalOption" option-attribute="signal_id"
                     placeholder="Select Signal" />
-                <UButton v-show="selectModal" color="gray" class="rounded-lg" @click="onSubmitDelete" trailingIcon="i-heroicons-trash">
+                <UButton v-show="selectModal" color="gray" class="rounded-lg" @click="onSubmitDelete"
+                    trailingIcon="i-heroicons-trash">
                     Delete Signal
-                    
+
                 </UButton>
-                
+
 
 
                 <div class="flex justify-end items-center py-2">
@@ -409,24 +415,27 @@ const links = [
             <div v-else class="text-white">
                 choose patient
             </div>
-            <div class="pt-4 justify-center flex flex-col space-y-2 w-full bg-gray-50 p-5 rounded-lg">
+            <div class="p-3">
+                <div class="pt-4 justify-center flex flex-col space-y-2 w-full bg-gray-50 p-5 rounded-lg">
 
-                <h2 class="text-lg font-medium">By Group 3: </h2>
-                <h2>Huỳnh Nguyên Minh Trí</h2>
-                <h2>Châu Thành Huy</h2>
-                <h2>Phạm Hoài Bảo</h2>
+                    <h2 class="text-lg font-medium">By Group 3: </h2>
+                    <h2>Huỳnh Nguyên Minh Trí</h2>
+                    <h2>Châu Thành Huy</h2>
+                    <h2>Phạm Hoài Bảo</h2>
 
 
-                <h1 class="text-xl font-medium text-center pt-4">BME Capstone Project <span
-                        class="font-bold text-primary">TeleUroflow</span> </h1>
-                <div class="flex items-center justify-center">
-                    <img src='https://i.ibb.co/sQPkGfj/eabedf33a318f626fcc0f14b799ea73e.png' alt="Girl in a jacket"
-                        width="39" height="39">
-                    <img src='https://i.ibb.co/KVQjzHh/a4e0e78ae6864eff3f8a2b17e3596811.png' alt="Girl in a jacket"
-                        width="39" height="39">
-
+                    <h1 class="text-xl font-medium text-center pt-4">BME Capstone Project <span
+                            class="font-bold text-primary">TeleUroflow</span> </h1>
+                    <div class="flex items-center justify-center space-x-1">
+                        <UAvatar src='https://i.ibb.co/sQPkGfj/eabedf33a318f626fcc0f14b799ea73e.png' alt="Girl in a jacket"
+                            size="lg" />
+                        <UAvatar src='https://i.ibb.co/KVQjzHh/a4e0e78ae6864eff3f8a2b17e3596811.png' alt="Girl in a jacket"
+                            size="lg" />
+                    </div>
                 </div>
             </div>
+
+
             <UserCard />
 
         </div>
@@ -512,5 +521,4 @@ const links = [
     </div>
     <UContainer v-if="!isAdmin">
         <UProgress animation="swing" />
-    </UContainer>
-</template>
+</UContainer></template>

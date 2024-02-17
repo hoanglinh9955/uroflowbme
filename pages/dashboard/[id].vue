@@ -1,11 +1,15 @@
 <template>
-    <UButton color="black" variant="link" class="absolute top-0" @click="goToDashBoard">
+    <UButton color="gray" class="absolute top-0" @click="goToDashBoard">
         <Icon size="35x" name="i-heroicons-arrow-long-left" />
     </UButton>
-
-    <div class="grid grid-cols-3 gap-1 h-screen" style="overflow-y: auto;">
-
-        <div class="col-span-2 p-5">
+    <UButton color="gray" class="absolute top-10 right-12" @click="print">
+        <Icon name="i-heroicons-printer" />
+    </UButton>
+    <div class="grid grid-cols-3 h-screen" style="overflow-y: auto;">
+        <div class="mt-8 mb-4 col-span-3 w-full bg-gray-100 rounded-t-lg text-center">
+            <h2>Volume over time</h2>
+        </div>
+        <div class="col-span-2 px-5 pb-̀̀5">
             <Chart1 :value_data="chart.volume.vol_value" :time_data="chart.volume.vol_time" />
         </div>
         <div class="col-span-1 flex flex-col space-y-2 justify-center items-center p-2">
@@ -13,25 +17,34 @@
                 <h3>Date time: </h3>
                 <h3>{{ chart.date_time }}</h3>
             </div>
+            <UDivider></UDivider>
             <div class="flex justify-between w-full">
                 <h3>Signal Id: </h3>
                 <h3>{{ chart.signal_id }}</h3>
             </div>
+            <UDivider></UDivider>
             <div class="flex justify-between w-full">
                 <h3>Median volume: </h3>
                 <h3>{{ chart.median_volume.toFixed(2) }}</h3>
             </div>
+            <UDivider></UDivider>
             <div class="flex justify-between w-full">
-                <h3>Voided mixed: </h3>
+                <h3>Voided volume: </h3>
                 <h3>{{ chart.voided_volume.toFixed(2) }}</h3>
             </div>
+            <UDivider></UDivider>
             <div class="flex justify-between w-full">
                 <h3>Max flow rate: </h3>
                 <h3>{{ chart.max_flow_rate.toFixed(2) }}</h3>
             </div>
+            <UDivider></UDivider>
 
 
         </div>
+        <div class="mt-8 mb-4 col-span-3 w-full bg-gray-100 rounded-t-lg text-center">
+            <h2>Flowrate over time</h2>
+        </div>
+        
         <div class="col-span-2 px-5">
             <Chart2 :value_data="chart.flow_rate.fr_value" :time_data="chart.flow_rate.fr_time" />
         </div>
@@ -40,17 +53,23 @@
                 <h3>Avg flow rate: </h3>
                 <h3>{{ chart.avg_flow_rate.toFixed(2) }}</h3>
             </div>
+            <UDivider></UDivider>
             <div class="flex justify-between w-full">
                 <h3>Time to max flow rate: </h3>
                 <h3>{{ chart.time_to_max_flow_rate.toFixed(2) }}</h3>
             </div>
+            <UDivider></UDivider>
             <div class="flex justify-between w-full">
 
                 <h3>Flow time: </h3>
                 <h3>{{ chart.flow_time.toFixed(2) }}</h3>
             </div>
+            <UDivider></UDivider>
         </div>
-
+        <div class="mt-8 mb-4 col-span-3 w-full bg-gray-100 rounded-t-lg text-center">
+            <h2>Nomogram</h2>
+        </div>
+       
         <div class="col-span-2 px-5">
             <NewChart :listData="dataListNomo" :age="age" />
         </div>
@@ -78,6 +97,9 @@ const age = storeToRefs(addOrderModal()).age;
 const route = useRoute()
 const reduceArray = reactive([])
 const supabase = useSupabaseClient();
+const print = () => {
+    window.print();
+}
 const editCommentState = async () =>{
     const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal/comment/${route.params.id}`, {
         method: 'put',
