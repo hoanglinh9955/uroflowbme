@@ -8,20 +8,20 @@
       <UForm :validate="validate" :state="state" class="space-y-4" @submit="onSubmit">
 
         <UFormGroup label="Patient Name" name="name">
-          <UInput color="teal" v-model="state.name" />
+          <UInput color="blue" v-model="state.name" />
         </UFormGroup>
 
         <UFormGroup label="Date Of Birth" name="dob">
-          <UInput color="teal" v-model="state.dob" :placeholder="'yyyy-MM-dd'"/>
+          <UInput color="blue" v-model="state.dob" :placeholder="'yyyy-MM-dd'"/>
         </UFormGroup>
 
 
         <UFormGroup label="Gender" name="gender">
-          <USelect color="teal" v-model="state.gender" :options="genderList" placeholder="Choose Gender" />
+          <USelect color="blue" v-model="state.gender" :options="genderList" placeholder="Choose Gender" />
         </UFormGroup>
 
 
-        <UButton color="teal" type="submit" :disabled="isSubmit">
+        <UButton color="blue" type="submit" :disabled="isSubmit">
           Add Patient
         </UButton>
       </UForm>
@@ -88,7 +88,7 @@ const onSubmit = async () => {
     isSubmit.value = false;
     isOpenAddPatient.value = false
     reloadState.value++
-    toast.add({ title: 'Add Patient Success !', timeout: 2500 , color: 'teal'})
+    toast.add({ title: 'Add Patient Success !', timeout: 2500 , color: 'blue'})
   }
 }
 </script>

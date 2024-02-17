@@ -54,22 +54,22 @@ export default {
           label: 'Qmax',
           data: qMaxData,
           fill: false,
-          borderColor: 'rgb(255, 0, 0)',
+          borderColor: '#289DA9',
           pointRadius: 0 // Hide points
         },
         {
           label: 'Qave',
           data: qAveData,
           fill: false,
-          borderColor: 'rgb(0, 0, 255)',
+          borderColor: '#4339F2',
           pointRadius: 0 // Hide points
         },
         {
           label: 'Data Qmax',
           data: this.listData.map(data => ({ x: data.voidvolume, y: data.qmax })),
           fill: false,
-          borderColor: 'rgb(255, 0, 0)',
-          backgroundColor: 'rgb(255, 0, 0)',
+          borderColor: '#289DA9',
+          backgroundColor: '#289DA9',
           pointStyle: 'circle',
           pointRadius: 5,
           showLine: false // This will create a scatter plot
@@ -78,8 +78,8 @@ export default {
           label: 'Data Qave',
           data: this.listData.map(data => ({ x: data.voidvolume, y: data.qave })),
           fill: false,
-          borderColor: 'rgb(0, 0, 255)',
-          backgroundColor: 'rgb(0, 0, 255)',
+          borderColor: '#4339F2',
+          backgroundColor: '#4339F2',
           pointStyle: 'circle',
           pointRadius: 5,
           showLine: false // This will create a scatter plot

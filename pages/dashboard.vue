@@ -14,6 +14,7 @@ const state = reactive({
     dob: undefined,
     gender: undefined
 })
+const isAdmin = ref(false)
 const genderstatus = ref(0)
 const genderList = ['Male', 'Female']
 const isSubmit = ref(false)
@@ -122,11 +123,25 @@ const onSubmit = async () => {
         isSubmit.value = false;
         isOpenAddPatient.value = false
         reloadState.value++
-        toast.add({ title: 'Add Patient Success !', timeout: 2500, color: 'teal' })
+        toast.add({ title: 'Add Patient Success !', timeout: 2500, color: 'blue' })
     }
 }
 
 
+const onSubmitDelete = async () => {
+
+    
+    console.log(selectedSignal.value)
+const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal/delete/${selectedSignal.value}`, {
+    method: 'delete'
+})
+selectedSignal.value = []
+
+if (data.value.message === 'Signal and related data deleted successfully') {
+    reloadState.value++
+    toast.add({ title: 'Delete signal success !', timeout: 2500, color: 'blue' })
+}
+}
 const onSubmitEdit = async () => {
 
     isEdit.value = true;
@@ -151,7 +166,7 @@ const onSubmitEdit = async () => {
         isEdit.value = false;
         isOpenAddPatient.value = false
         reloadState.value++
-        toast.add({ title: 'Update Patient Success !', timeout: 2500, color: 'teal' })
+        toast.add({ title: 'Update Patient Success !', timeout: 2500, color: 'blue' })
     }
 }
 
@@ -186,11 +201,14 @@ watch(reloadState, async () => {
         );
     }
     selectedSignal.value = []
+    const { data: newData} = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal_meta/${selected.value.patient_id}`)
+        signalOption.value = newData.value
 });
 
 watch(selected,
     async () => {
         selectedSignal.value = [];
+        isAddSignal.value = false
         const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal_meta/${selected.value.patient_id}`)
         signalOption.value = data.value
         birthDate.value = new Date(selected.value.dob);
@@ -206,6 +224,16 @@ watch(selected,
     }
 )
 
+watch(isAddSignal,
+    async () => {
+        const { data, pending, error, refresh } = await useFetch(`https://27h447fm75fpicw4wbt2x6powe0wraio.lambda-url.ap-southeast-1.on.aws/signal/activate/${selected.value.patient_id}`, {
+            method: 'put'
+        })
+        console.log(data.value)
+        console.log("🚀 ~ error:", error)
+
+    }
+)
 
 
 const columns = [{
@@ -250,7 +278,7 @@ const deletePatient = async () => {
 
     if (data.value.message === 'Patient and related data deleted successfully') {
         reloadState.value++;
-        toast.add({ title: 'Delete Patient Successfully !', timeout: 2500, color: 'teal' })
+        toast.add({ title: 'Delete Patient Successfully !', timeout: 2500, color: 'blue' })
         isDelete.value = false;
         selected.value = undefined
 
@@ -266,6 +294,14 @@ function select(row: any) {
 }
 
 const q = ref('')
+
+const selectModal = computed(() =>{
+    if(selectedSignal.value.length != 0){
+        return true
+    }else{
+        return false
+    }
+})
 
 const filteredRows = computed(() => {
     if (!q.value) {
@@ -287,10 +323,12 @@ const paginatedRows = computed(() => {
     const endIndex = startIndex + pageCount;
     return filteredRows.value.slice(startIndex, endIndex);
 });
-// const user = useSupabaseUser();
-// if (user.value?.email != "hoanglinh9955@gmail.com") {
-//     logout();
-// }
+const user = useSupabaseUser();
+if (!user.value) {
+    logout();
+} else {
+    isAdmin.value = true
+}
 
 const links = [
     {
@@ -308,26 +346,28 @@ const links = [
     }]
 
 
+
+
 </script>
 
 <template>
-    <div class="flex ">
+    <div v-if="isAdmin" class="flex ">
         <!-- sidebar -->
-        <div class="flex flex-col bg-[#74aeb4] items-center w-1/6 pt-4 font-sans justify-between">
+        <div class="flex flex-col items-center w-1/5 pt-4 font-sans justify-between">
 
-            <div class="w-full p-3" v-if="selected">
+            <div class="w-full p-3 flex flex-col space-y-3" v-if="selected">
                 <!-- add patient container     -->
                 <div class="flex justify-between">
-                    <h1 class="text-white text-xl font-medium">Patient Information</h1>
-                    <UButton :disabled="isDisableButton" class="rounded-lg bg-teal-600 hover:bg-teal-700"
+                    <h1 class="text-xl font-medium">Patient Information</h1>
+                    <UButton variant="ghost" color="gray" :disabled="isDisableButton" class="rounded-lg"
                         @click="isEdit = true">
                         <Icon size="15px" name="i-heroicons-pencil-square" />
                     </UButton>
                 </div>
                 <!-- patient infor -->
-                <div class="text-white pt-4 flex flex-col space-y-3 w-full">
+                <div class="pt-4 flex flex-col space-y-4 w-full bg-gray-50 p-2 rounded-lg">
 
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center ">
                         <h2>Name: </h2>
                         <h2>{{ selected.name }}</h2>
                     </div>
@@ -342,43 +382,61 @@ const links = [
                 </div>
 
                 <div class="flex justify-between items-baseline">
-                    <h1 class="pt-8 pb-4 text-white text-lg font-medium">Signal</h1>
-                    <UButton :loading="isAddSignal" color="teal" class="rounded-lg h-auto bg-teal-600 hover:bg-teal-700"
-                        @click="isAddSignal = true">
-                        <Icon size="15px" name="i-heroicons-funnel" />
-                    </UButton>
-
-
+                    <h1 class="pt-2 pb-4 text-xl font-medium">Signal</h1>
+                    <UToggle v-model="isAddSignal" />
                 </div>
 
-
-
-                <USelect v-model="selectedSignal" :options="signalOption" option-attribute="signal_id"
+                <USelect color="gray" v-model="selectedSignal" :options="signalOption" option-attribute="signal_id"
                     placeholder="Select Signal" />
+                <UButton v-show="selectModal" color="gray" class="rounded-lg" @click="onSubmitDelete" trailingIcon="i-heroicons-trash">
+                    Delete Signal
+                    
+                </UButton>
+                
+
 
                 <div class="flex justify-end items-center py-2">
                     <div> </div>
-                    <UButton v-show="isAddSignal" color="teal" class="rounded-lg h-auto bg-teal-600 hover:bg-teal-700"
+                    <!-- <UButton v-show="isAddSignal" class="rounded-lg h-auto"
                         @click="isAddSignal = false">
                         <Icon size="15px" name="i-heroicons-check" />Done
-                    </UButton>
+                    </UButton> -->
+
                 </div>
+
             </div>
 
             <div v-else class="text-white">
                 choose patient
             </div>
+            <div class="pt-4 justify-center flex flex-col space-y-2 w-full bg-gray-50 p-5 rounded-lg">
 
+                <h2 class="text-lg font-medium">By Group 3: </h2>
+                <h2>Huỳnh Nguyên Minh Trí</h2>
+                <h2>Châu Thành Huy</h2>
+                <h2>Phạm Hoài Bảo</h2>
+
+
+                <h1 class="text-xl font-medium text-center pt-4">BME Capstone Project <span
+                        class="font-bold text-primary">TeleUroflow</span> </h1>
+                <div class="flex items-center justify-center">
+                    <img src='https://i.ibb.co/sQPkGfj/eabedf33a318f626fcc0f14b799ea73e.png' alt="Girl in a jacket"
+                        width="39" height="39">
+                    <img src='https://i.ibb.co/KVQjzHh/a4e0e78ae6864eff3f8a2b17e3596811.png' alt="Girl in a jacket"
+                        width="39" height="39">
+
+                </div>
+            </div>
             <UserCard />
 
         </div>
 
         <!-- content -->
-        <div class="w-5/6 h-screen">
+        <div class="w-4/5 h-screen bg-gray-50">
             <UContainer v-if="!isSignalSelected">
                 <div class="flex justify-between px-3 py-3.5 border-b border-gray-200 dark:border-gray-700">
                     <UInput v-model="q" placeholder="Search..." trailing icon="i-heroicons-magnifying-glass-20-solid" />
-                    <UButton class="rounded-lg  bg-teal-600 hover:bg-teal-700 ml-4" @click="isOpenAddPatient = true">
+                    <UButton class="rounded-lg ml-4" @click="isOpenAddPatient = true">
                         <Icon size="20px" name="i-heroicons-plus" />
                     </UButton>
                 </div>
@@ -390,7 +448,7 @@ const links = [
                             </UDropdown>
                         </template>
                         <template v-if="selected" #patient_id-data="{ row }">
-                            <span :class="{ 'text-teal-400 dark:text-teal-300': selected.patient_id == row.patient_id }">{{
+                            <span :class="{ 'text-blue-400 dark:text-blue-300': selected.patient_id == row.patient_id }">{{
                                 row.patient_id }}</span>
                         </template>
 
@@ -401,7 +459,7 @@ const links = [
                     </template>
                 </NuxtErrorBoundary>
                 <div class="flex justify-end">
-                    <UPagination class="p-2" :active-button="{ color: 'teal' }" :inactive-button="{ color: 'gray' }"
+                    <UPagination class="p-2" :active-button="{ color: 'blue' }" :inactive-button="{ color: 'gray' }"
                         show-last show-first v-model="page" :page-count="pageCount" :total="filteredRows.length" />
 
                 </div>
@@ -413,7 +471,7 @@ const links = [
                         <UContainer class="flex justify-around p-3 pt-1">
                             <UButton color="red" class="w-24 text-center justify-center" @click="deletePatient">Yes
                             </UButton>
-                            <UButton color="teal" class="w-24 text-center justify-center" @click="isDelete = false">No
+                            <UButton class="w-24 text-center justify-center" @click="isDelete = false">No
                             </UButton>
                         </UContainer>
                     </div>
@@ -427,21 +485,20 @@ const links = [
                         <UForm :validate="validate" :state="state" class="space-y-4" @submit="onSubmitEdit">
 
                             <UFormGroup label="Patient Name" name="name">
-                                <UInput color="teal" v-model="state.name" />
+                                <UInput v-model="state.name" />
                             </UFormGroup>
 
                             <UFormGroup label="Date Of Birth" name="dob">
-                                <UInput color="teal" v-model="state.dob" :placeholder="'yyyy-MM-dd'" />
+                                <UInput v-model="state.dob" :placeholder="'yyyy-MM-dd'" />
                             </UFormGroup>
 
 
                             <UFormGroup label="Gender" name="gender">
-                                <USelect color="teal" v-model="state.gender" :options="genderList"
-                                    placeholder="Choose Gender" />
+                                <USelect v-model="state.gender" :options="genderList" placeholder="Choose Gender" />
                             </UFormGroup>
 
 
-                            <UButton color="teal" type="submit" :disabled="isSubmit">
+                            <UButton type="submit" :disabled="isSubmit">
                                 Edit Patient
                             </UButton>
                         </UForm>
@@ -453,4 +510,7 @@ const links = [
             </UContainer>
         </div>
     </div>
+    <UContainer v-if="!isAdmin">
+        <UProgress animation="swing" />
+    </UContainer>
 </template>

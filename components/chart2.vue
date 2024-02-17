@@ -50,8 +50,8 @@ return {
         label: 'Flow Rate',
         data: this.value_data,
         fill: true,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: '#DAD7FE',
+          borderColor: '#4339F2',
         tension: 0.4,
         pointBorderWidth: 0,
         pointStyle: false

@@ -4,7 +4,7 @@ export default defineAppConfig({
         // Show toasts at the top right of the screen
         position: 'top-center'
       },
-      primary: 'teal',
-      gray: 'cool'
+      // primary: 'teal',
+      primary: 'blue'
     }
   })
